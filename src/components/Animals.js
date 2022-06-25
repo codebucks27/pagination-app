@@ -1,23 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { usePaginatedQuery, useQuery } from 'react-query';
 import Animal from './Animal';
+import PaginationComponent from './paginationComponent';
 
-const fetchAnimals = async (key, page) => {
+const fetchAnimals = async (key, page, pageNumberLimit) => {
   const headers = { 'app-id': '628cfd76d7c13ab387fde193' }
   // GET request to get data
-  const res = await fetch(`https://dummyapi.io/data/v1/post?limit=10&page=${page}`, { headers } );
+  const res = await fetch(`https://dummyapi.io/data/v1/post?limit=${pageNumberLimit}&page=${page}`, { headers } );
     return res.json();
 }
 
 
 const Animals = () => {
   const [ page, setPage ] = useState(1);
+  const [ totalPage, setTotalPage ] = useState(1);
+  const [ pageNumberLimit, setpageNumberLimit ] = useState(10);
+
+
   const { 
     resolvedData, 
     latestData, 
     status 
-  } = usePaginatedQuery(['animals', page], fetchAnimals);
-  console.log(latestData)
+  } = usePaginatedQuery(['animals', page, pageNumberLimit], fetchAnimals);
+  // console.log(latestData)
+
+
+  const handlePage=(val) =>{
+    setPage(val);
+    console.log(val);
+  }
+
+  const handleLimit=(val) =>{
+    setpageNumberLimit(val);
+  }
+
+  useEffect(() => {
+    // let arr = [];
+          if(latestData !== undefined){
+           
+              let noOfPages = Math.ceil(latestData.total/latestData.limit);
+            setTotalPage(noOfPages);
+            setpageNumberLimit(latestData.limit)
+            // for (let i = 1; i <= noOfPages; i++) {
+            //   arr.push(i);
+            // }
+    
+            // setPages(arr)
+          }
+         
+        }, [latestData]);
+
   return (
     <div>
     
@@ -41,7 +73,9 @@ const Animals = () => {
                   <div className="mt-6 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-x-6">
                       { resolvedData.data.map(animal => <Animal key={animal} animal={animal} /> ) }
                   </div>
-                  <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' 
+
+                  <PaginationComponent currentPage={page} handleLimit={handleLimit} handlePage={(v)=> handlePage(v)} pageNumberLimit={pageNumberLimit} totalPages={totalPage}/>
+                  {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' 
             onClick={() => setPage(old => Math.max(old - 1, 1))} 
             disabled={page === 1}>
             Previous Page
@@ -51,7 +85,7 @@ const Animals = () => {
             onClick={() => setPage(old => (!latestData || !latestData.next ? old : old + 1))} 
             disabled={!latestData || !latestData.next}>
             Next page
-          </button>
+          </button> */}
                 </div>
               </div>
             </div>          
