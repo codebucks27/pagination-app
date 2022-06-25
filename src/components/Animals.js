@@ -1,81 +1,80 @@
-import React, { useState,useEffect } from 'react';
-import { usePaginatedQuery, useQuery } from 'react-query';
-import Animal from './Animal';
-import PaginationComponent from './paginationComponent';
+import React, { useState, useEffect } from "react";
+import { useQuery } from "react-query";
+import Animal from "./Animal";
+import PaginationComponent from "./paginationComponent";
+import LoadingIndicator from "./LoadingIndicator";
 
 const fetchAnimals = async (key, page, pageNumberLimit) => {
-  const headers = { 'app-id': '628cfd76d7c13ab387fde193' }
+  const headers = { "app-id": "628cfd76d7c13ab387fde193" };
   // GET request to get data
-  const res = await fetch(`https://dummyapi.io/data/v1/post?limit=${pageNumberLimit}&page=${page}`, { headers } );
-    return res.json();
-}
+  const res = await fetch(
+    `https://dummyapi.io/data/v1/post?limit=${pageNumberLimit}&page=${page}`,
+    { headers }
+  );
 
+  return res.json();
+};
 
 const Animals = () => {
-  const [ page, setPage ] = useState(1);
-  const [ totalPage, setTotalPage ] = useState(1);
-  const [ pageNumberLimit, setpageNumberLimit ] = useState(10);
+  const [page, setPage] = useState(1);
 
+  const [totalPage, setTotalPage] = useState(1);
+  const [pageNumberLimit, setpageNumberLimit] = useState(5);
 
-  const { 
-    resolvedData, 
-    latestData, 
-    status 
-  } = usePaginatedQuery(['animals', page, pageNumberLimit], fetchAnimals);
-  // console.log(latestData)
+  const { data, isError, error, isFetching, isPreviousData  } = useQuery(
+    ["animals", page, pageNumberLimit],
+    fetchAnimals,
+    {
+      keepPreviousData: true,
+    }
+  );
 
+  // console.log(isFetching,isSuccess)
 
-  const handlePage=(val) =>{
+  const handlePage = (val) => {
     setPage(val);
-    console.log(val);
-  }
+  };
 
-  const handleLimit=(val) =>{
+  const handleLimit = (val) => {
     setpageNumberLimit(val);
-  }
+  };
 
-  useEffect(() => {
-    // let arr = [];
-          if(latestData !== undefined){
-           
-              let noOfPages = Math.ceil(latestData.total/latestData.limit);
-            setTotalPage(noOfPages);
-            setpageNumberLimit(latestData.limit)
-            // for (let i = 1; i <= noOfPages; i++) {
-            //   arr.push(i);
-            // }
-    
-            // setPages(arr)
-          }
-         
-        }, [latestData]);
+
 
   return (
     <div>
-    
+      {isError && <div>Error in fetching data</div>}
+     
 
-      {status === 'loading' && (
-        <div>Loading data</div>
-      )}
-
-      {status === 'error' && (
-        <div>Error fetching data</div>
-      )}
-
-      {status === 'success' && (
-        <>
-      
-          <div className="bg-gray-100">
-            <h2>Animals</h2>
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="max-w-2xl mx-auto py-16 sm:py-24 lg:py-32 lg:max-w-none">
-                  <h2 className="text-2xl font-extrabold text-gray-900">Collections</h2>
+      <>
+        <div className={isFetching ? "bg-gray-100 h-full" : "bg-gray-100"}>
+          <h2 className="text-4xl text-gray-900">Animals</h2>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto py-16 sm:py-24 lg:py-32 lg:max-w-none">
+              <h2 className="text-2xl font-bold text-gray-900">
+                Collections
+              </h2>
+              {isFetching ? (
+                <LoadingIndicator />
+              ) : (
+                <>
                   <div className="mt-6 space-y-12 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-x-6">
-                      { resolvedData.data.map(animal => <Animal key={animal} animal={animal} /> ) }
+                    {data.data.map((animal) => (
+                      <Animal key={animal.id} animal={animal} />
+                    ))}
                   </div>
+                  <PaginationComponent
+                currentPage={page}
+                handleLimit={handleLimit}
+                handlePage={(v) => handlePage(v)}
+                pageLimit={pageNumberLimit}
+                totalPages={ Math.ceil(data?.total / data?.limit)}
+              />
+                </>
+              )}
+             
 
-                  <PaginationComponent currentPage={page} handleLimit={handleLimit} handlePage={(v)=> handlePage(v)} pageNumberLimit={pageNumberLimit} totalPages={totalPage}/>
-                  {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' 
+              {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' 
             onClick={() => setPage(old => Math.max(old - 1, 1))} 
             disabled={page === 1}>
             Previous Page
@@ -86,13 +85,12 @@ const Animals = () => {
             disabled={!latestData || !latestData.next}>
             Next page
           </button> */}
-                </div>
-              </div>
-            </div>          
-        </>
-      )} 
+            </div>
+          </div>
+        </div>
+      </>
     </div>
   );
-}
- 
+};
+
 export default Animals;
