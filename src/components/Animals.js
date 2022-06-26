@@ -26,6 +26,7 @@ const Animals = () => {
     fetchAnimals,
     {
       keepPreviousData: true,
+      refetchOnWindowFocus:false,
     }
   );
 
@@ -63,16 +64,16 @@ const Animals = () => {
                       <Animal key={animal.id} animal={animal} />
                     ))}
                   </div>
-                  <PaginationComponent
+                  
+                </>
+              )}
+              <PaginationComponent
                 currentPage={page}
                 handleLimit={handleLimit}
                 handlePage={(v) => handlePage(v)}
                 pageLimit={pageNumberLimit}
                 totalPages={ Math.ceil(data?.total / data?.limit)}
               />
-                </>
-              )}
-             
 
               {/* <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded' 
             onClick={() => setPage(old => Math.max(old - 1, 1))} 

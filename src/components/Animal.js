@@ -11,7 +11,7 @@ const LikeBtn = () => {
 }
 
 const Animal = ({ animal }) => {
-  // console.log(animal);
+  console.log(animal);
   return (
     <div key={animal.text} className="group relative">
     <div className="relative w-full h-80 bg-white rounded-lg overflow-hidden group-hover:opacity-75 sm:aspect-w-2 sm:aspect-h-1 sm:h-64 lg:aspect-w-1 lg:aspect-h-1">
@@ -23,7 +23,7 @@ const Animal = ({ animal }) => {
       
     </div>
     <h3 className="mt-6 text-sm text-gray-500">
-      <a href={animal.text}>
+      <a href={animal.image} target="_blank">
         <span className="absolute inset-0" />
         {animal.text}
       </a>
